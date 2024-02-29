@@ -34,6 +34,7 @@ MainWindow::~MainWindow()
 /****************************************************/
 QVector<uint32_t> MainWindow::ReadFile(QString path, uint8_t numberChannel)
 {
+    QVector<uint32_t> readData;
 
     QFile file(path);
     file.open(QIODevice::ReadOnly);
@@ -45,19 +46,15 @@ QVector<uint32_t> MainWindow::ReadFile(QString path, uint8_t numberChannel)
             mb.setWindowTitle("Ошибка");
             mb.setText("Ошибка открытия фала");
             mb.exec();
+            return readData;
         }
-    }
-    else{
-
-        //продумать как выйти из функции
     }
 
     QDataStream dataStream;
     dataStream.setDevice(&file);
     dataStream.setByteOrder(QDataStream::LittleEndian);
 
-    QVector<uint32_t> readData;
-    readData.clear();
+    //readData.clear();
     uint32_t currentWorld = 0, sizeFrame = 0;
 
     while(dataStream.atEnd() == false){
@@ -98,6 +95,8 @@ QVector<double> MainWindow::ProcessFile(const QVector<uint32_t> dataFile)
     QVector<double> resultData;
     resultData.clear();
 
+    if (dataFile.empty()){return resultData;}
+
     foreach (int word, dataFile) {
         word &= 0x00FFFFFF;
         if(word > 0x800000){
@@ -137,7 +136,6 @@ QVector<double> MainWindow::FindMax(QVector<double> resultData)
 
 QVector<double> MainWindow::FindMin(QVector<double> resultData)
 {
-
     double min = 0, sMin = 0;
     QThread::sleep(1);
     //Поиск первого максиума
@@ -227,6 +225,7 @@ void MainWindow::on_pb_start_clicked()
     auto read = [&]{ return ReadFile(pathToFile, numberSelectChannel); };
     auto process = [&](QVector<uint32_t> res){ return ProcessFile(res);};
     auto findMax = [&](QVector<double> res){
+                                                if (res.empty()){return;}
                                                 maxs = FindMax(res);
                                                 mins = FindMin(res);
 
