@@ -225,7 +225,13 @@ void MainWindow::on_pb_start_clicked()
     auto read = [&]{ return ReadFile(pathToFile, numberSelectChannel); };
     auto process = [&](QVector<uint32_t> res){ return ProcessFile(res);};
     auto findMax = [&](QVector<double> res){
-                                                if (res.empty()){return;}
+                                                if (res.empty())
+                                                {
+                                                    ui->pb_showGraph->setEnabled(true);
+                                                    ui->pb_clearResult->setEnabled(true);
+                                                    ui->pb_start->setEnabled(true);
+                                                    return;
+                                                }
                                                 maxs = FindMax(res);
                                                 mins = FindMin(res);
 
